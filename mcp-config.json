@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "pinescript-v6": {
+      "type": "stdio",
+      "command": "/root/Skill_Seekers/venv/bin/python3",
+      "args": [
+        "-m",
+        "skill_seekers.mcp.server_fastmcp"
+      ],
+      "cwd": "/root/Skill_Seekers",
+      "env": {
+        "SKILL_PATH": "/root/Skill_Seekers/pinescriptv6"
+      }
+    }
+  }
+}
