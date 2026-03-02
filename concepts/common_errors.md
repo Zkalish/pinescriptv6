@@ -548,3 +548,96 @@ The total number of trades or orders simulated by  [strategies](https://www.trad
 To limit the starting point of a strategy, a simple and effective approach is to use a  [conditional structure](https://www.tradingview.com/pine-script-docs/language/conditional-structures)  that activates the strategy’s  [order placement commands](https://www.tradingview.com/pine-script-docs/concepts/strategies/#order-placement-and-cancellation)  only when the bar’s opening or closing time comes after a specified date.
 
 See the  [How do I filter trades by a date or time range?](https://www.tradingview.com/pine-script-docs/faq/strategies/#how-do-i-filter-trades-by-a-date-or-time-range)  portion of our  [Strategies FAQ page](https://www.tradingview.com/pine-script-docs/faq/strategies/)  for an example of this technique.
+
+---
+
+## Compile Errors: Declaration Order (PHL2 Projesi Deneyimleri)
+
+### Undeclared identifier "useHHV" (fonksiyon tanımlama sırası)
+
+**Sorun:** Fonksiyon, kullanılan değişkenlerden önce tanımlandığında oluşur. Pine Script’te fonksiyonlar, kullandıkları değişkenlerden **sonra** veya **önce** tanımlanabilir, ancak kullanıldıkları yerden **önce** derlenmelidir.
+
+**Çözüm:** Fonksiyonu, içinde kullandığı tüm değişkenler tanımlandıktan sonra ve fonksiyonun çağrıldığı yerden önce tanımlayın.
+
+```pine
+// DOĞRU SIRALAMA ÖRNEĞİ:
+
+// 1. Önce değişkenler tanımlanır
+useHHV = input.bool(true, title="HHV?")
+useST = input.bool(true, title="ST?")
+
+// 2. Sonra fonksiyon tanımlanır
+getActiveFilters() =>
+    filters = ""
+    filters := useHHV ? filters + "HHV+" : filters
+    filters := useST ? filters + "ST+" : filters
+    // ...
+    filters
+
+// 3. En son fonksiyon kullanılır
+if barstate.islast
+    activeFilters = getActiveFilters()
+```
+
+---
+
+### Undeclared identifier "color.cyan"
+
+**Sorun:** Pine Script’te `color.cyan` diye bir renk yoktur.
+
+**Çözüm:** Mevcut renklerden birini kullanın veya `color.new()` ile oluşturun:
+
+```pine
+// Yanlış:
+text_color=color.cyan
+
+// Doğru (mevcut renklerden):
+text_color=color.blue
+
+// Veya yeni renk oluştur:
+text_color=color.new(color.blue, 0)
+```
+
+Mevcut temel renkler: `color.black`, `color.white`, `color.red`, `color.green`, `color.blue`, `color.orange`, `color.purple`, `color.maroon`, `color.gray`, `color.lime`, `color.fuchsia`, `color.aqua`, `color.yellow`, `color.silver`, `color.navy`, `color.olive`, `color.teal`.
+
+---
+
+### Undeclared identifier "strategy.losstades" (yazım hatası)
+
+**Sorun:** `strategy.losstades` yanlış yazılmış. Doğru isim `strategy.losstrades`.
+
+**Çözüm:**
+
+```pine
+// Yanlış:
+losses = strategy.losstades
+
+// Doğru:
+losses = strategy.losstrades
+```
+
+**İpucu:** Diğer doğru isimler: `strategy.wintrades`, `strategy.netprofit`, `strategy.grossprofit`, `strategy.grossloss`, `strategy.max_drawdown`.
+
+---
+
+### Fonksiyon tanımlama kuralları özeti
+
+1. **Kural:** Fonksiyon, kullanıldığı yerden **önce** derlenmelidir
+2. **Kural:** Fonksiyon içinde kullanılan değişkenler, fonksiyondan **önce** tanımlanmış olmalı
+3. **İpucu:** Fonksiyonları dosyanın sonuna yakın, tüm değişkenler tanımlandıktan sonra tanımlayın, panel gibi kodların içinden önce
+
+---
+
+### Bonus: Table BG şeffaflığı
+
+**Sorun:** Açık tema kullanırken paneller okunaksız olabilir.
+
+**Çözüm:** Tam siyah arka plan için şeffaflığı kaldırın:
+
+```pine
+// Yarı şeffaf (okunaksız olabilir):
+var table panel = table.new(position.bottom_right, 2, 10, bgcolor=color.new(color.black, 80))
+
+// Tam siyah (daha okunaklı):
+var table panel = table.new(position.bottom_right, 2, 10, bgcolor=color.black)
+```
