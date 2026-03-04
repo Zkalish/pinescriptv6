@@ -360,7 +360,8 @@ This keyword allows the declaration of user-defined types (UDT) from which scrip
 //@version=6
 indicator("Multi Time Period Chart", overlay = true)
 
-timeframeInput = input.timeframe("1D")
+timeframeInput = input.timeframe(title="Timeframe", defval="1D")
+// Doğru format: "1" (1dk), "15" (15dk), "60" (1saat), "240" (4saat), "1D" (1gün), "1W" (1hafta)
 
 type bar
     float o = open

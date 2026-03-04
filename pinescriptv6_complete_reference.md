@@ -5952,8 +5952,12 @@ Result of input.timeframe function always should be assigned to a variable, see 
 ```pine
 //@version=6
 indicator("input.timeframe", overlay=true)
-i_res = input.timeframe('D', "Resolution", options=['D', 'W', 'M'])
-s = request.security("AAPL", i_res, close)
+
+// MTF örnek - doğru format!
+tf = input.timeframe(title="Timeframe", defval="1D")
+
+// Timeframe seçenekleri: "1" (1dk), "15" (15dk), "60" (1saat), "240" (4saat), "1D" (1gün), "1W" (1hafta)
+s = request.security("AAPL", tf, close)
 plot(s)
 ```
 

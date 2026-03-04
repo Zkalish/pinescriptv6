@@ -628,6 +628,82 @@ losses = strategy.losstrades
 
 ---
 
+---
+
+### Undeclared identifier "ta.variance" (mevcut olmayan fonksiyon)
+
+**Sorun:** Pine Script'te `ta.variance` fonksiyonu mevcut değildir. Trend MA tipi olarak "VAR" seçeneği kullanılmaya çalışılıyor ama bu fonksiyon yok.
+
+**Çözüm:** Variance yerine EMA veya başka bir MA tipi kullanın:
+
+```pine
+// Yanlış:
+trendMA = ta.variance(dTrend, trendPeriod)
+
+// Doğru (EMA kullan):
+trendMA = ta.ema(dTrend, trendPeriod)
+
+// Veya tamamen kaldır:
+trendMA = switch trendType
+    "SMA" => ta.sma(dTrend, trendPeriod)
+    "EMA" => ta.ema(dTrend, trendPeriod)
+    "ZLMA" => ta.ema(ta.ema(dTrend, math.round(trendPeriod/2)), math.round(trendPeriod/2))
+    "DEMA" => 2 * ta.ema(dTrend, trendPeriod) - ta.ema(ta.ema(dTrend, trendPeriod), trendPeriod)
+    => ta.ema(dTrend, trendPeriod)
+```
+
+---
+
+### MTF Zincirleme Yapı Sorunu (KHL Filtresi)
+
+**Sorun:** Kivanc HL zincirleme yapısı (H1->H2->H3->...) MTF `request.security` içinde çalışmaz. `ta.valuewhen` ve `ta.highest` serileri MTF bağlamında düzgün hesaplanmaz.
+
+**Çözüm:** Zincirleme yerine direkt hesaplama kullanın:
+
+```pine
+// Yanlış (zincirleme - MTF'de çalışmaz):
+H1 = ta.valuewhen(high[1] >= ta.highest(high, 13), ta.highest(high, 13), 0)
+H2 = ta.valuewhen(H1[1] >= ta.highest(high, 21), ta.highest(high, 21), 0)
+// ...
+
+// Doğru (direkt - MTF uyumlu):
+H6_val = ta.highest(high, hlPeriod)
+L6_val = ta.lowest(low, hlPeriod)
+dHighK = request.security(syminfo.tickerid, hlTimeframe, H6_val[1], lookahead=barmerge.lookahead_off)
+dLowK = request.security(syminfo.tickerid, hlTimeframe, L6_val[1], lookahead=barmerge.lookahead_off)
+```
+
+---
+
+### Tekrarlanan Hesaplama ve var Hatası
+
+**Sorun:** Panel hesaplamaları içinde aynı kod bloğu tekrarlanıyor ve `var` ile tekrar değişken tanımlanıyor. Bu "Already declared" hatası verir.
+
+**Çözüm:** Hesaplamaları tek bir yerde yapın ve panel görselleştirmesini ayrın:
+
+```pine
+// 1. TEK HESAPLAMA BLOĞU (global scope)
+if barstate.islast or barstate.isrealtime
+    // Hesaplamaları burada yap
+    wins := 0
+    losses := 0
+    // ... tüm hesaplamalar
+
+// 2. PANEL 1 - sadece görselleştirme
+if barstate.islast or barstate.isrealtime
+    // Hesaplamaları TEKRARLAMA - yukarıdaki sonuçları kullan
+    table.cell(panel1, 0, 0, "Değer: " + str.tostring(wins))
+
+// 3. PANEL 2 - sadece görselleştirme
+if barstate.islast or barstate.isrealtime
+    // var KULLANMA - global değişkenleri doğrudan kullan
+    table.cell(panel2, 0, 0, "Değer: " + str.tostring(losses))
+```
+
+**Önemli:** `var` anahtar kelimesi sadece dosyanın başında, global değişkenler için kullanılmalıdır. Panel hesaplama blokları içinde TEKRAR kullanılmamalıdır.
+
+---
+
 ### Bonus: Table BG şeffaflığı
 
 **Sorun:** Açık tema kullanırken paneller okunaksız olabilir.
