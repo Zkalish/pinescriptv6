@@ -630,30 +630,6 @@ losses = strategy.losstrades
 
 ---
 
-### Undeclared identifier "ta.variance" (mevcut olmayan fonksiyon)
-
-**Sorun:** Pine Script'te `ta.variance` fonksiyonu mevcut değildir. Trend MA tipi olarak "VAR" seçeneği kullanılmaya çalışılıyor ama bu fonksiyon yok.
-
-**Çözüm:** Variance yerine EMA veya başka bir MA tipi kullanın:
-
-```pine
-// Yanlış:
-trendMA = ta.variance(dTrend, trendPeriod)
-
-// Doğru (EMA kullan):
-trendMA = ta.ema(dTrend, trendPeriod)
-
-// Veya tamamen kaldır:
-trendMA = switch trendType
-    "SMA" => ta.sma(dTrend, trendPeriod)
-    "EMA" => ta.ema(dTrend, trendPeriod)
-    "ZLMA" => ta.ema(ta.ema(dTrend, math.round(trendPeriod/2)), math.round(trendPeriod/2))
-    "DEMA" => 2 * ta.ema(dTrend, trendPeriod) - ta.ema(ta.ema(dTrend, trendPeriod), trendPeriod)
-    => ta.ema(dTrend, trendPeriod)
-```
-
----
-
 ### MTF Zincirleme Yapı Sorunu (KHL Filtresi)
 
 **Sorun:** Kivanc HL zincirleme yapısı (H1->H2->H3->...) MTF `request.security` içinde çalışmaz. `ta.valuewhen` ve `ta.highest` serileri MTF bağlamında düzgün hesaplanmaz.
